@@ -4,7 +4,7 @@
   "repository": "sander217/sanbuilder",
   "plugin": "design-harness-agent",
   "version": "0.2.0",
-  "sourceCommit": "103c8336114435ae1e0ab2f0e892b6febb66935a",
+  "sourceCommit": "10d736d2446d948b5ece663e1bd7a433273e2741",
   "generatedAt": "2026-09-08",
   "files": {
     ".agents/plugins/marketplace.json": "7123c0fb8afa4dd2e4eabc1447e01242ca6f9b0a1a1ab43c93604ae88355a17d",
