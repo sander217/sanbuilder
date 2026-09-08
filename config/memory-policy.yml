@@ -1,0 +1,30 @@
+schema: 1
+
+scopes:
+  run:
+    purpose: Preserve exact evidence, artifacts, approvals, QA, and digest lineage for one run.
+    storage: external-run-store
+    promotion: never-automatic
+
+  product:
+    purpose: Preserve platform, journey, content, component, and product-specific decisions.
+    storage: memory/products
+    promotion: approved-proposal-or-shipped-qa
+
+  brand:
+    purpose: Preserve durable visual taste, voice, signature patterns, and cross-product preferences.
+    storage: memory/brands
+    promotion: explicit-human-preference-confirmed-across-products
+
+rules:
+  - Raw chat transcripts and agent opinions are evidence, not durable memory.
+  - Every durable memory item names its scope, source, status, confidence, and review trigger.
+  - Rejection reasons are remembered so future variants do not repeat the same mismatch.
+  - A product decision cannot silently rewrite brand taste.
+  - A brand decision is proposed as a contract change and requires human approval.
+  - Superseded decisions remain in history and point to their replacement.
+
+retention:
+  keepRunTrace: true
+  keepSupersededDecisions: true
+  expireUnconfirmedHypotheses: true

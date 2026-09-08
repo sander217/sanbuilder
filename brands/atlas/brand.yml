@@ -1,0 +1,26 @@
+schema: 1
+id: atlas
+name: Atlas
+status: active
+
+designContract:
+  id: atlas-brand-design
+  ref: atlas-brand@1.0.0
+  path: contracts/atlas/DESIGN.md
+  owner: design-systems
+  description: Fictional sample identity, tokens, and brand behavior.
+
+tasteProfile:
+  ref: atlas-taste@1.0.0
+  path: brands/atlas/taste.yml
+
+memory:
+  path: memory/brands/atlas.yml
+
+products:
+  - path: products/atlas-web/product.yml
+
+inheritance:
+  productMayExtend: true
+  productMayOverride: reviewed-only
+  silentForks: forbidden

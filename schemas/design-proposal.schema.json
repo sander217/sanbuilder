@@ -1,0 +1,296 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sander217/sanbuilder/schemas/design-proposal.schema.json",
+  "title": "Design Harness Approvable Design Proposal",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "proposalId",
+    "runId",
+    "revision",
+    "status",
+    "productTruth",
+    "inputLocks",
+    "title",
+    "summary",
+    "rationale",
+    "directionSet",
+    "userFlows",
+    "stateMatrix",
+    "responsiveMatrix",
+    "accessibilityRequirements",
+    "componentPlan",
+    "acceptanceCriteria",
+    "nonGoals",
+    "evidenceIds",
+    "approval",
+    "createdAt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "artifactType": { "const": "design-proposal" },
+    "proposalId": { "type": "string", "minLength": 1 },
+    "runId": { "type": "string", "minLength": 1 },
+    "revision": { "type": "integer", "minimum": 1 },
+    "status": { "enum": ["draft", "ready-for-approval", "approved", "rejected", "superseded"] },
+    "productTruth": { "const": "production-code" },
+    "inputLocks": {
+      "type": "object",
+      "required": ["intake", "contractLock", "researchReport", "productBaseCommit", "productAdapterRevision", "sanstudioRevision", "laneDesignArtifacts"],
+      "properties": {
+        "intake": { "$ref": "#/$defs/digest" },
+        "contractLock": { "$ref": "#/$defs/digest" },
+        "researchReport": { "$ref": "#/$defs/digest" },
+        "productBaseCommit": { "$ref": "#/$defs/gitCommit" },
+        "productAdapterRevision": { "type": "string", "minLength": 1 },
+        "sanstudioRevision": { "$ref": "#/$defs/gitCommit" },
+        "laneDesignArtifacts": {
+          "type": "object",
+          "properties": {
+            "contextLock": { "$ref": "#/$defs/digest" },
+            "directionProposal": { "$ref": "#/$defs/digest" },
+            "designProposal": { "$ref": "#/$defs/digest" },
+            "productionPackage": { "$ref": "#/$defs/digest" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "title": { "type": "string", "minLength": 1, "maxLength": 240 },
+    "summary": { "type": "string", "minLength": 1 },
+    "rationale": { "type": "string", "minLength": 1 },
+    "directionSet": {
+      "type": "object",
+      "required": ["decision", "recommendedDirectionId", "directions"],
+      "properties": {
+        "decision": { "type": "string", "minLength": 1 },
+        "recommendedDirectionId": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+        "recommendationRationale": { "type": "string", "minLength": 1 },
+        "directions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5,
+          "items": { "$ref": "#/$defs/direction" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "userFlows": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/userFlow" }
+    },
+    "stateMatrix": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/state" }
+    },
+    "responsiveMatrix": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/responsiveRule" }
+    },
+    "accessibilityRequirements": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "componentPlan": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/component" }
+    },
+    "acceptanceCriteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "nonGoals": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "evidenceIds": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "contractDiffs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["contractId", "required", "summary"],
+        "properties": {
+          "contractId": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+          "required": { "type": "boolean" },
+          "summary": { "type": "string", "minLength": 1 },
+          "artifactDigest": { "$ref": "#/$defs/digest" }
+        },
+        "allOf": [
+          {
+            "if": { "properties": { "required": { "const": true } }, "required": ["required"] },
+            "then": {
+              "properties": { "artifactDigest": { "$ref": "#/$defs/digest" } },
+              "required": ["artifactDigest"]
+            }
+          }
+        ],
+        "additionalProperties": false
+      }
+    },
+    "preview": {
+      "type": "object",
+      "required": ["authority", "format", "artifactDigest"],
+      "properties": {
+        "authority": { "const": "non-authoritative-reference" },
+        "format": { "enum": ["image", "figma", "html", "video", "other"] },
+        "artifactDigest": { "$ref": "#/$defs/digest" },
+        "uri": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "approval": {
+      "type": "object",
+      "required": ["required", "binding"],
+      "properties": {
+        "required": { "const": true },
+        "binding": { "const": "proposal-digest" },
+        "proposalDigest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    },
+    "createdAt": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "gitCommit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+    "direction": {
+      "type": "object",
+      "required": ["id", "name", "differenceAxes", "optimizes", "brandFit", "productFit", "tradeoffs", "risks", "mockups"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "differenceAxes": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": ["hierarchy", "composition", "interaction", "information-architecture", "content-strategy", "motion", "visual-language"]
+          },
+          "uniqueItems": true
+        },
+        "optimizes": { "type": "string", "minLength": 1 },
+        "brandFit": { "type": "string", "minLength": 1 },
+        "productFit": { "type": "string", "minLength": 1 },
+        "tradeoffs": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "risks": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "evidenceIds": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "mockups": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["state", "viewport", "format", "artifactDigest", "authority"],
+            "properties": {
+              "state": { "type": "string", "minLength": 1 },
+              "viewport": { "enum": ["desktop", "tablet", "mobile"] },
+              "format": { "enum": ["image", "figma", "html", "video", "other"] },
+              "artifactDigest": { "$ref": "#/$defs/digest" },
+              "uri": { "type": "string", "minLength": 1 },
+              "authority": { "const": "non-authoritative-reference" }
+            },
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "userFlow": {
+      "type": "object",
+      "required": ["id", "userGoal", "entry", "steps", "outcome"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "userGoal": { "type": "string", "minLength": 1 },
+        "entry": { "type": "string", "minLength": 1 },
+        "steps": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "outcome": { "type": "string", "minLength": 1 },
+        "recovery": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "state": {
+      "type": "object",
+      "required": ["surface", "state", "trigger", "behavior", "required"],
+      "properties": {
+        "surface": { "type": "string", "minLength": 1 },
+        "state": { "type": "string", "minLength": 1 },
+        "trigger": { "type": "string", "minLength": 1 },
+        "behavior": { "type": "string", "minLength": 1 },
+        "recovery": { "type": "string", "minLength": 1 },
+        "required": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "responsiveRule": {
+      "type": "object",
+      "required": ["viewport", "composition", "invariants"],
+      "properties": {
+        "viewport": { "enum": ["desktop", "tablet", "mobile"] },
+        "composition": { "type": "string", "minLength": 1 },
+        "invariants": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "component": {
+      "type": "object",
+      "required": ["name", "action", "responsibility", "props", "accessibility"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "action": { "enum": ["reuse", "extend", "create", "remove"] },
+        "sourcePath": { "type": "string", "minLength": 1 },
+        "responsibility": { "type": "string", "minLength": 1 },
+        "props": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "accessibility": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

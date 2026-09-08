@@ -1,0 +1,57 @@
+schema: 1
+
+connections:
+  mobbin:
+    kind: mcp
+    serverAlias: mobbin
+    configuredBy: client
+    credentials: external
+  a1-gallery:
+    kind: mcp
+    serverAlias: a1
+    configuredBy: client
+    credentials: external
+  figma:
+    kind: mcp
+    serverAlias: figma
+    configuredBy: client
+    credentials: external
+  image-search:
+    kind: built-in-or-mcp
+    configuredBy: client
+    credentials: external
+
+capabilities:
+  pattern-research:
+    purpose: Find interaction precedents and comparable product flows.
+    preferredTools:
+      - mobbin
+    required: false
+    unavailableBehavior: record-evidence-gap
+
+  art-direction:
+    purpose: Build and compare visually coherent directions against the active brand taste profile.
+    preferredTools:
+      - a1-gallery
+      - image-search
+    required: false
+    unavailableBehavior: use-approved-brand-evidence
+
+  production-inspection:
+    purpose: Inspect real product code, components, routes, states, and design tokens.
+    preferredTools:
+      - repository-adapter
+      - browser
+    required: true
+
+  figma-backup:
+    purpose: Back up an approved implementation for review after product QA and draft PR recording.
+    preferredTools:
+      - figma
+    required: false
+    authorization: exact-file-and-product-pr-digest
+
+secretsPolicy:
+  storeCredentialsInRepository: false
+  authenticationOwnedByClient: true
+  repositoryMcpManifestRequiresReviewedServerDefinition: true

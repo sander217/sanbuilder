@@ -1,0 +1,20 @@
+{
+  "name": "sanbuilder",
+  "interface": {
+    "displayName": "Sanbuilder"
+  },
+  "plugins": [
+    {
+      "name": "design-harness-agent",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

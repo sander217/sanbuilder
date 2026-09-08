@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sander217/sanbuilder/schemas/prompt-run.schema.json",
+  "title": "Design Harness Prompt Run",
+  "type": "object",
+  "required": ["id", "prompt", "mode", "environment", "lane", "adapterId", "status", "currentStage", "intake", "contractLock"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "prompt": { "type": "string", "minLength": 1, "maxLength": 8000 },
+    "mode": { "enum": ["proposal", "delivery", "dry-run"] },
+    "environment": { "type": "string", "minLength": 1 },
+    "lane": { "enum": ["Fast Lane", "Standard", "Major"] },
+    "adapterId": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "status": {
+      "enum": ["ready-for-proposal", "in-progress", "awaiting-approval", "approved", "blocked", "rejected", "completed", "completed-with-warnings"]
+    },
+    "currentStage": {
+      "enum": [
+        "intake",
+        "analyze",
+        "compile-contract-lock",
+        "research",
+        "context-lock",
+        "direction-lock",
+        "design-lock",
+        "production-lock",
+        "build-proposal",
+        "design-qa",
+        "human-approval",
+        "implementation",
+        "product-qa",
+        "product-pr",
+        "figma-backup"
+      ]
+    },
+    "intake": { "$ref": "intake.schema.json" },
+    "contractLock": { "$ref": "contract-lock.schema.json" }
+  },
+  "additionalProperties": true
+}

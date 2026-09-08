@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sander217/sanbuilder/schemas/intake.schema.json",
+  "title": "Design Harness Agent Intake",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "runId",
+    "target",
+    "request",
+    "sources",
+    "createdAt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "artifactType": { "const": "intake" },
+    "runId": { "type": "string", "minLength": 1 },
+    "target": {
+      "type": "object",
+      "required": ["brand", "product", "surface", "adapter", "environment", "repository", "baseBranch"],
+      "properties": {
+        "brand": { "$ref": "#/$defs/slug" },
+        "product": { "$ref": "#/$defs/slug" },
+        "surface": { "$ref": "#/$defs/slug" },
+        "adapter": { "$ref": "#/$defs/slug" },
+        "environment": { "$ref": "#/$defs/slug" },
+        "repository": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$" },
+        "baseBranch": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "request": {
+      "type": "object",
+      "required": ["title", "prompt", "nonGoals", "acceptanceCriteria"],
+      "properties": {
+        "title": { "type": "string", "minLength": 1, "maxLength": 240 },
+        "prompt": { "type": "string", "minLength": 1, "maxLength": 20000 },
+        "nonGoals": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "acceptanceCriteria": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "constraints": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/source" }
+    },
+    "locale": { "type": "string", "minLength": 2 },
+    "createdBy": { "type": "string", "minLength": 1 },
+    "createdAt": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "source": {
+      "type": "object",
+      "required": ["id", "kind", "label", "digest"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "kind": {
+          "enum": ["prompt", "ticket", "conversation", "screenshot", "figma", "url", "file", "other"]
+        },
+        "label": { "type": "string", "minLength": 1, "maxLength": 240 },
+        "digest": { "$ref": "#/$defs/digest" },
+        "content": { "type": "string" },
+        "uri": { "type": "string", "minLength": 1 },
+        "mediaType": { "type": "string", "minLength": 1 },
+        "capturedAt": { "type": "string", "format": "date-time" },
+        "metadata": { "type": "object" }
+      },
+      "anyOf": [
+        { "properties": { "content": {} }, "required": ["content"] },
+        { "properties": { "uri": {} }, "required": ["uri"] }
+      ],
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

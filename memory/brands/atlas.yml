@@ -1,0 +1,28 @@
+schema: 1
+scope: brand
+subject: atlas
+
+decisions:
+  - id: calm-capable-workspace
+    status: accepted
+    statement: Prefer a calm and capable workspace where user content outranks decoration.
+    rationale: This demonstrates the shape of a durable brand-level preference.
+    source:
+      kind: contract
+      ref: atlas-brand@1.0.0
+    confidence: high
+    appliesTo:
+      - atlas-web
+    reviewWhen: The fictional sample is replaced with a real brand contract.
+
+  - id: avoid-generic-ai-decoration
+    status: accepted
+    statement: Avoid generic gradients, unexplained sparkles, and ornamental AI signifiers.
+    rationale: Capability should be communicated through clear action, state, consequence, and recovery.
+    source:
+      kind: contract
+      ref: atlas-brand@1.0.0
+    confidence: high
+    appliesTo:
+      - atlas-web
+    reviewWhen: A new brand direction is explicitly approved.

@@ -1,0 +1,30 @@
+schema: 2
+repository: sander217/sanbuilder
+baseBranch: main
+
+contracts:
+  atlas-brand-design:
+    scope: brand
+    brand: atlas
+    ref: atlas-brand@1.0.0
+    path: contracts/atlas/DESIGN.md
+    owner: design-systems
+  atlas-web-experience:
+    scope: product
+    brand: atlas
+    product: atlas-web
+    ref: atlas-web@1.0.0
+    path: contracts/atlas/EXPERIENCE.md
+    owner: product-ux
+  atlas-web-qa:
+    scope: product
+    brand: atlas
+    product: atlas-web
+    ref: atlas-web-qa@1.0.0
+    path: contracts/atlas/qa-policy.yml
+    owner: product-qa
+
+inheritance:
+  order: [brand-design, brand-taste, product-experience, product-qa, adapter-environment]
+  productOverrides: reviewed-only
+  materialChangesInvalidateApproval: true
