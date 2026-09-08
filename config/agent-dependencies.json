@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "cache": {
+    "environmentVariable": "DESIGN_HARNESS_AGENT_CACHE",
+    "legacyEnvironmentVariable": "SANBUILDER_AGENT_CACHE",
+    "defaultPath": ".cache/design-harness-agent/dependencies"
+  },
+  "dependencies": [
+    {
+      "id": "research-synthesis",
+      "kind": "agent-skill",
+      "repository": "https://github.com/sander217/research-synthesis.git",
+      "revision": "6974e6a8b375efba3bbc48966600943e3ace12ad",
+      "resolvedFrom": "refs/heads/main",
+      "access": "read-only",
+      "requiredPaths": [
+        "SKILL.md",
+        "references/evidence-and-time.md",
+        "references/external-research.md",
+        "references/output-formats.md"
+      ]
+    },
+    {
+      "id": "sanstudio",
+      "kind": "design-gates",
+      "repository": "https://github.com/sander217/sanstudio.git",
+      "revision": "3217439e9d5437b50daeca5e8efab20da30d8422",
+      "resolvedFrom": "origin/HEAD -> refs/heads/main",
+      "access": "read-only",
+      "requiredPaths": [
+        "skills/context-lock/SKILL.md",
+        "skills/direction-lock/SKILL.md",
+        "skills/design-lock/SKILL.md",
+        "skills/production-lock/SKILL.md"
+      ]
+    }
+  ]
+}

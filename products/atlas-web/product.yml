@@ -1,0 +1,43 @@
+schema: 1
+id: atlas-web
+brand: atlas
+name: Atlas Web App
+surface: web-app
+status: active
+
+memory:
+  path: memory/products/atlas-web.yml
+
+contracts:
+  design: atlas-brand-design
+  experience:
+    id: atlas-web-experience
+    ref: atlas-web@1.0.0
+    path: contracts/atlas/EXPERIENCE.md
+    owner: product-ux
+    description: Fictional sample journeys, objects, states, and recovery behavior.
+  qa:
+    id: atlas-web-qa
+    ref: atlas-web-qa@1.0.0
+    path: contracts/atlas/qa-policy.yml
+    owner: product-qa
+    description: Fictional sample design and product quality gates.
+
+adapters:
+  - adapters/atlas-web/adapter.yml
+
+defaultTarget:
+  adapter: atlas-web
+  environment: example
+
+routing:
+  journeys:
+    - id: work-library
+      keywords: ["library", "workspace", "empty state", "collection"]
+    - id: guided-task
+      keywords: ["assistant", "guided task", "approval", "progress", "recovery"]
+
+inheritance:
+  brandDesign: required
+  brandTaste: required
+  productOverridesRequireProposal: true

@@ -1,0 +1,26 @@
+{
+  "name": "sanbuilder",
+  "version": "0.2.0",
+  "private": false,
+  "description": "A product-neutral, approval-gated design pipeline for Codex and Claude.",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "scripts": {
+    "generate:catalog": "node scripts/generate-product-catalog.mjs",
+    "validate:catalog": "node scripts/generate-product-catalog.mjs --check",
+    "validate:schemas": "node scripts/validate-schemas.mjs",
+    "generate:schema-validators": "node scripts/generate-schema-validators.mjs",
+    "validate:plugin": "node scripts/validate-public-package.mjs",
+    "sync:agent-dependencies": "node scripts/sync-agent-dependencies.mjs sync",
+    "design-agent": "node scripts/design-agent-run.mjs",
+    "test:core": "node --test tests/public-core.test.mjs",
+    "test": "npm run validate:plugin && npm run validate:catalog && npm run validate:schemas && npm run test:core"
+  },
+  "dependencies": {
+    "ajv": "^8.20.0",
+    "ajv-formats": "^3.0.1",
+    "yaml": "^2.9.0"
+  }
+}

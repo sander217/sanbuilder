@@ -1,0 +1,9 @@
+{
+  "name": "design-harness-agent",
+  "version": "0.2.0",
+  "description": "Run a product-neutral, taste-aware design pipeline from evidence and alternatives through approved implementation and QA.",
+  "author": {
+    "name": "Sander Chen"
+  },
+  "repository": "https://github.com/sander217/sanbuilder"
+}

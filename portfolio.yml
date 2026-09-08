@@ -1,0 +1,26 @@
+schema: 2
+id: atlas-design-portfolio
+name: Atlas Design Portfolio
+
+hierarchy:
+  parent: brand
+  child: product
+  runtimeTarget: adapter
+
+brands:
+  - path: brands/atlas/brand.yml
+
+workflowAdapters:
+  - adapters/sanstudio/adapter.yml
+
+capabilities:
+  path: config/design-capabilities.yml
+
+memory:
+  policy: config/memory-policy.yml
+
+rules:
+  - Brand contracts define shared identity, visual language, voice, and taste.
+  - Product contracts inherit their brand and define platform-specific journeys and behavior.
+  - Adapters bind one product to exact production repositories and environments.
+  - Approved product code remains truth; Figma is an optional backup.

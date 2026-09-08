@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sander217/sanbuilder/schemas/contract-lock.schema.json",
+  "title": "Design Harness Contract Lock",
+  "type": "object",
+  "required": [
+    "runId",
+    "repository",
+    "sourceCommit",
+    "brand",
+    "productProfile",
+    "design",
+    "taste",
+    "memory",
+    "experience",
+    "productAdapter",
+    "product",
+    "dependencies",
+    "qaPolicy"
+  ],
+  "properties": {
+    "runId": { "type": "string", "minLength": 1 },
+    "repository": { "const": "sander217/sanbuilder" },
+    "sourceCommit": { "$ref": "#/$defs/gitCommit" },
+    "brand": {
+      "type": "object",
+      "required": ["id", "ref", "digest"],
+      "properties": {
+        "id": { "$ref": "#/$defs/slug" },
+        "ref": { "type": "string", "minLength": 1 },
+        "digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    },
+    "productProfile": {
+      "type": "object",
+      "required": ["id", "surface", "ref", "digest"],
+      "properties": {
+        "id": { "$ref": "#/$defs/slug" },
+        "surface": { "$ref": "#/$defs/slug" },
+        "ref": { "type": "string", "minLength": 1 },
+        "digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    },
+    "design": { "$ref": "#/$defs/versionedRef" },
+    "taste": { "$ref": "#/$defs/versionedRef" },
+    "memory": {
+      "type": "object",
+      "required": ["policy", "brand", "product"],
+      "properties": {
+        "policy": { "$ref": "#/$defs/versionedRef" },
+        "brand": { "$ref": "#/$defs/versionedRef" },
+        "product": { "$ref": "#/$defs/versionedRef" }
+      },
+      "additionalProperties": false
+    },
+    "experience": { "$ref": "#/$defs/versionedRef" },
+    "productAdapter": {
+      "type": "object",
+      "required": ["id", "revision"],
+      "properties": {
+        "id": { "$ref": "#/$defs/slug" },
+        "revision": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "product": {
+      "type": "object",
+      "required": ["repository", "baseBranch", "commit"],
+      "properties": {
+        "repository": { "type": "string", "minLength": 1 },
+        "baseBranch": { "type": "string", "minLength": 1 },
+        "commit": { "$ref": "#/$defs/gitCommit" }
+      },
+      "additionalProperties": false
+    },
+    "dependencies": {
+      "type": "object",
+      "required": ["research", "sanstudio"],
+      "properties": {
+        "research": { "$ref": "#/$defs/gitDependency" },
+        "sanstudio": { "$ref": "#/$defs/gitDependency" }
+      },
+      "additionalProperties": false
+    },
+    "qaPolicy": { "$ref": "#/$defs/versionedRef" }
+  },
+  "$defs": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "gitCommit": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "gitDependency": {
+      "type": "object",
+      "required": ["repository", "commit"],
+      "properties": {
+        "repository": { "type": "string", "minLength": 1 },
+        "commit": { "$ref": "#/$defs/gitCommit" }
+      },
+      "additionalProperties": false
+    },
+    "versionedRef": {
+      "type": "object",
+      "required": ["ref", "digest"],
+      "properties": {
+        "ref": { "type": "string", "minLength": 1 },
+        "digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    }
+  },
+  "additionalProperties": false
+}
