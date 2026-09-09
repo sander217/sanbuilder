@@ -4,7 +4,7 @@
   "repository": "sander217/sanbuilder",
   "plugin": "design-harness-agent",
   "version": "0.2.0",
-  "sourceCommit": "221102b6a07b8c12b292d239b7ff09fccfb38b74",
+  "sourceCommit": "d7e3413ff65bced554e87b49d12bebb950f1f204",
   "generatedAt": "2026-09-09",
   "files": {
     ".agents/plugins/marketplace.json": "7123c0fb8afa4dd2e4eabc1447e01242ca6f9b0a1a1ab43c93604ae88355a17d",
@@ -36,7 +36,7 @@
     "lib/generated-schema-validators.mjs": "e1760ca990d1d2d1efb72822de98968b2f2c78e4f6cddf857ee8bb6d0c5bb270",
     "lib/harness.ts": "ee0de1d9ebdd81b7ecbcddcc56d3ce5f961ba56b5e9de8f72b9241fcdb86c4fc",
     "lib/implementation.ts": "f4714984434d181d3f507e23ea48edae258a6a333a153f03e0ec3df265a8a953",
-    "lib/release-provenance.mjs": "c5236ab414069fcafad16960982e3e2ee60c774922bc600a1dce000e025c30fb",
+    "lib/release-provenance.mjs": "74e39b9ca1dc2262196ec1010a24332e3c4711438e229fef988c3c522044f965",
     "lib/schema-validation.mjs": "17fe465e113b710c2ca55f92741a2fe3c82714c2f5cb026b7fa96ab9824a83d6",
     "memory/brands/atlas.yml": "8bff742481c4eaac4f55e04c5047aab6f7b2e156e097a612a99ff227a9a42eb4",
     "memory/products/atlas-web.yml": "4ffd3cc11783dc419203a5c7f9f861562227dddf1d1339b2a200d48f74db48f7",
