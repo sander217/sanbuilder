@@ -18,6 +18,32 @@ portfolio
 
 A brand owns cross-product identity: visual language, voice, shared tokens, signature behavior, taste, and anti-patterns. A product is one application users operate, such as a Web App, Mobile App, or Management Console. An adapter binds that product to one exact repository, base branch, immutable revision, runtime, test suite, and environment.
 
+## Contract packs and access boundaries
+
+The Harness engine and design data are separate authorities. One engine may load many contract packs in the private authoring environment, but each product session binds to exactly one pack at one commit.
+
+Use one contract-pack repository per real access domain—not one per screen or feature. One team pack may contain that brand's Web, Mobile, and Console products. A separately owned brand belongs in another private pack when the first team must not read it. GitHub repository access, not folders or `CODEOWNERS`, is the confidentiality boundary.
+
+The product repository stores `.design-harness/target.yml`:
+
+```yaml
+schema: 1
+contractPack:
+  id: example-brand
+  repository: example-org/example-brand-design-contracts
+  baseBranch: main
+  revision: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+target:
+  brand: example-brand
+  product: example-web
+  adapter: example-web-uat
+  environment: uat
+```
+
+The revision must be a full commit. The client fetches it to an external read-only cache. Never store credentials in the binding, copy one pack into another, or let a product session fall back to another pack when access fails.
+
+Contract updates are ordinary reviewed pull requests in the pack repository. After merge, separately review and update product bindings and any private authoring pin. This prevents an unreviewed contract change from silently changing an existing run.
+
 Versions and references are adapters or authorities, not automatically separate brands. For example, Atlas Legacy may remain a visual reference adapter while Atlas Web is the active Atlas Web delivery adapter.
 
 ## Onboarding

@@ -15,6 +15,15 @@ The pipeline must stay adaptive. Stage boundaries preserve evidence, approval, a
 
 Locate the plugin root by walking upward from this file until `portfolio.yml`, `config/agent-dependencies.json`, and `workflows/change-run.yml` are present. Do not assume a user-specific install path.
 
+In the active product repository, look for `.design-harness/target.yml`. When present, it is the only contract-pack connection for that product session:
+
+1. Validate that it names one exact GitHub repository, full commit, brand, product, adapter, and environment.
+2. Run `node <plugin-root>/scripts/sync-contract-packs.mjs check --binding <binding-path> --json`; if missing, run `sync` once and check again.
+3. Read only the returned immutable, read-only checkout. Never enumerate or load a different private pack merely because the authoring portfolio knows it exists.
+4. Pass `--binding <binding-path>` when starting the portable coordinator.
+
+The binding may not point at a branch or floating tag. A product repository can update its pinned contract revision through normal review, but an agent may not silently advance it.
+
 Read the active product repository instructions, then resolve four coordinates:
 
 - `brand`: the shared identity and taste authority;
@@ -22,7 +31,7 @@ Read the active product repository instructions, then resolve four coordinates:
 - `adapter`: its exact repository/runtime bridge;
 - `environment`: the revision and runtime being evaluated.
 
-Read `portfolio.yml` and `config/product-catalog.generated.json`. The generated catalog must match its YAML sources. Refuse a delivery run for an `onboarding` brand/product, a reference-only adapter, an unknown environment, or an unpinned repository revision. Read [references/architecture.md](references/architecture.md) when onboarding a brand/product, changing inheritance, or selecting among multiple adapters.
+Without a product binding, read `portfolio.yml` and `config/product-catalog.generated.json`; authoring installations may aggregate separately pinned contract packs. The generated catalog must match its YAML and pack pins. Refuse a delivery run for an `onboarding` brand/product, a reference-only adapter, an unknown environment, or an unpinned repository revision. Read [references/architecture.md](references/architecture.md) when onboarding a brand/product, changing inheritance, managing a contract pack, or selecting among multiple adapters.
 
 Treat repositories under the reserved `example/` owner and adapter restrictions beginning with `replace-this-sample` as documentation fixtures. Refuse delivery until the maintainer replaces the fixture with an exact repository, base branch, immutable revision, runtime, and approved environment.
 
@@ -41,7 +50,7 @@ Use [references/runtime.md](references/runtime.md) for portable coordinator comm
 
 ## Compile brand, product, taste, and memory
 
-Every run pins the Harness source, brand profile, product profile, brand design contract, brand taste profile, brand memory, product memory, product experience contract, adapter revision, QA policy, Research Synthesis revision, and SanStudio revision.
+Every run separately pins the Harness source, contract-pack source, brand profile, product profile, brand design contract, brand taste profile, brand memory, product memory, product experience contract, adapter revision, QA policy, Research Synthesis revision, and SanStudio revision.
 
 Apply authority in this order:
 

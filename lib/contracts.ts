@@ -9,6 +9,7 @@ export interface BrandRecord {
   name: string;
   status: CatalogStatus;
   configPath: string;
+  sourceId: string | null;
   designContractId: string | null;
   tasteProfile: { ref: string; path: string } | null;
   memoryPath: string | null;
@@ -23,6 +24,7 @@ export interface ProductRecord {
   surface: string;
   status: CatalogStatus;
   configPath: string;
+  sourceId: string | null;
   memoryPath: string | null;
   journeyRouting: Array<{ id: string; keywords: string[] }>;
   contractIds: { design: string | null; experience: string | null; qa: string | null };
@@ -39,6 +41,7 @@ export interface AdapterTarget {
   name: string;
   status: CatalogStatus;
   configPath: string;
+  sourceId: string | null;
   repository: string;
   baseBranch: string;
   commit: string;
@@ -56,6 +59,8 @@ export interface ContractTarget {
   description: string;
   repository: string;
   baseBranch: string;
+  commit: string;
+  sourceId: string | null;
   path: string;
   reference: string;
   kind: "design" | "experience" | "qa";
@@ -65,9 +70,19 @@ export interface ContractTarget {
 }
 
 interface ProductCatalog {
-  schema: 1;
+  schema: 1 | 2;
   generatedFrom: string;
   portfolio: { id: string; name: string; capabilitiesPath: string; memoryPolicyPath: string };
+  sources: Array<{
+    id: string;
+    repository: string;
+    baseBranch: string;
+    commit: string;
+    manifestPath: string;
+    catalogPath: string;
+  }>;
+  contractRegistries: Array<{ sourceId: string | null; path: string }>;
+  scenarioRegistries: Array<{ sourceId: string | null; path: string }>;
   brands: BrandRecord[];
   products: ProductRecord[];
   adapters: AdapterTarget[];
@@ -81,12 +96,19 @@ interface ProductCatalog {
     scope: "brand" | "product";
     brandId: string;
     productId: string | null;
+    sourceId: string | null;
+    repository?: string;
+    baseBranch?: string;
+    commit?: string;
   }>;
 }
 
 export const PRODUCT_CATALOG = generatedCatalog as unknown as ProductCatalog;
 export const BRANDS = PRODUCT_CATALOG.brands;
 export const PRODUCTS = PRODUCT_CATALOG.products;
+export const CONTRACT_SOURCES = Object.fromEntries(
+  (PRODUCT_CATALOG.sources ?? []).map((source) => [source.id, source]),
+);
 
 export const CONTRACT_TARGETS = Object.fromEntries(
   PRODUCT_CATALOG.contracts.map((contract) => [
@@ -96,8 +118,10 @@ export const CONTRACT_TARGETS = Object.fromEntries(
       name: contract.path.split("/").at(-1) ?? contract.id,
       owner: contract.owner,
       description: contract.description,
-      repository: releaseProvenance.repository,
-      baseBranch: "main",
+      repository: contract.repository ?? releaseProvenance.repository,
+      baseBranch: contract.baseBranch ?? "main",
+      commit: contract.commit ?? "",
+      sourceId: contract.sourceId ?? null,
       path: contract.path,
       reference: contract.ref,
       kind: contract.kind,

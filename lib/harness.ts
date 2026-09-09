@@ -97,6 +97,7 @@ export interface ContractLockSnapshot {
   runId: string;
   repository: string;
   sourceCommit: string;
+  harness: { repository: string; commit: string };
   brand: { id: string; ref: string; digest: string };
   productProfile: { id: string; surface: string; ref: string; digest: string };
   design: { ref: string; digest: string };

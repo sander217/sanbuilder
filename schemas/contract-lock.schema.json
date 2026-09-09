@@ -7,6 +7,7 @@
     "runId",
     "repository",
     "sourceCommit",
+    "harness",
     "brand",
     "productProfile",
     "design",
@@ -20,8 +21,9 @@
   ],
   "properties": {
     "runId": { "type": "string", "minLength": 1 },
-    "repository": { "const": "sander217/sanbuilder" },
+    "repository": { "$ref": "#/$defs/repository" },
     "sourceCommit": { "$ref": "#/$defs/gitCommit" },
+    "harness": { "$ref": "#/$defs/gitDependency" },
     "brand": {
       "type": "object",
       "required": ["id", "ref", "digest"],
@@ -69,7 +71,7 @@
       "type": "object",
       "required": ["repository", "baseBranch", "commit"],
       "properties": {
-        "repository": { "type": "string", "minLength": 1 },
+        "repository": { "$ref": "#/$defs/repository" },
         "baseBranch": { "type": "string", "minLength": 1 },
         "commit": { "$ref": "#/$defs/gitCommit" }
       },
@@ -99,7 +101,7 @@
       "type": "object",
       "required": ["repository", "commit"],
       "properties": {
-        "repository": { "type": "string", "minLength": 1 },
+        "repository": { "$ref": "#/$defs/repository" },
         "commit": { "$ref": "#/$defs/gitCommit" }
       },
       "additionalProperties": false
@@ -116,6 +118,10 @@
     "digest": {
       "type": "string",
       "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "repository": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
     }
   },
   "additionalProperties": false

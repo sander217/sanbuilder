@@ -7,12 +7,26 @@
     "capabilitiesPath": "config/design-capabilities.yml",
     "memoryPolicyPath": "config/memory-policy.yml"
   },
+  "sources": [],
+  "contractRegistries": [
+    {
+      "sourceId": null,
+      "path": "contracts/registry.yml"
+    }
+  ],
+  "scenarioRegistries": [
+    {
+      "sourceId": null,
+      "path": "scenarios/registry.yml"
+    }
+  ],
   "brands": [
     {
       "id": "atlas",
       "name": "Atlas",
       "status": "active",
       "configPath": "brands/atlas/brand.yml",
+      "sourceId": null,
       "designContractId": "atlas-brand-design",
       "tasteProfile": {
         "ref": "atlas-taste@1.0.0",
@@ -33,6 +47,7 @@
       "surface": "web-app",
       "status": "active",
       "configPath": "products/atlas-web/product.yml",
+      "sourceId": null,
       "memoryPath": "memory/products/atlas-web.yml",
       "journeyRouting": [
         {
@@ -79,6 +94,7 @@
       "name": "Atlas Web Example",
       "status": "active",
       "configPath": "adapters/atlas-web/adapter.yml",
+      "sourceId": null,
       "repository": "example/atlas-web",
       "baseBranch": "main",
       "commit": "1111111111111111111111111111111111111111",
@@ -108,6 +124,7 @@
       "name": "SanStudio Proposal",
       "status": "workflow",
       "configPath": "adapters/sanstudio/adapter.yml",
+      "sourceId": null,
       "repository": "sander217/sanstudio",
       "baseBranch": "main",
       "commit": "3217439e9d5437b50daeca5e8efab20da30d8422",
@@ -135,7 +152,8 @@
       "kind": "design",
       "scope": "brand",
       "brandId": "atlas",
-      "productId": null
+      "productId": null,
+      "sourceId": null
     },
     {
       "id": "atlas-web-experience",
@@ -146,7 +164,8 @@
       "kind": "experience",
       "scope": "product",
       "brandId": "atlas",
-      "productId": "atlas-web"
+      "productId": "atlas-web",
+      "sourceId": null
     },
     {
       "id": "atlas-web-qa",
@@ -157,7 +176,8 @@
       "kind": "qa",
       "scope": "product",
       "brandId": "atlas",
-      "productId": "atlas-web"
+      "productId": "atlas-web",
+      "sourceId": null
     }
   ]
 }

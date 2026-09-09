@@ -8,6 +8,14 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 import {
+  assertExternalContractCache,
+  contractPackCacheRoot,
+  normalizeRepository,
+  readContractPackConfig,
+  readDesignHarnessBinding,
+  syncContractPack,
+} from "../lib/contract-packs.mjs";
+import {
   approveCoordinatorRun,
   assertStageArtifactContent,
   authorizeFigmaBackup,
@@ -42,7 +50,7 @@ const MUTATION_COMMANDS = new Set([
 function usage() {
   return [
     "Usage:",
-    "  design-agent-run.mjs start --request <json-file> [--store <absolute-path>]",
+    "  design-agent-run.mjs start --request <json-file> [--binding <design-harness.yml>] [--store <absolute-path>]",
     "  design-agent-run.mjs status --run <run-id> [--store <absolute-path>]",
     "  design-agent-run.mjs begin --run <run-id> [--store <absolute-path>]",
     "  design-agent-run.mjs submit --run <run-id> --stage <stage> --artifact <json-file> [--store <absolute-path>]",
@@ -433,38 +441,43 @@ async function loadReleasePins(resolved) {
   return { byId, productCommit, harnessCommit };
 }
 
-async function contractLock(runId, resolved) {
+async function contractLock(runId, resolved, files) {
   const pins = await loadReleasePins(resolved);
   const [brandConfig, productConfig, design, taste, memoryPolicy, brandMemory, productMemory, experience, qa] = await Promise.all([
-    readFile(path.join(harnessRoot, resolved.brand.configPath), "utf8"),
-    readFile(path.join(harnessRoot, resolved.product.configPath), "utf8"),
-    readFile(path.join(harnessRoot, resolved.contracts.design.path), "utf8"),
-    readFile(path.join(harnessRoot, resolved.brand.tasteProfile.path), "utf8"),
-    readFile(path.join(harnessRoot, resolved.memoryPolicyPath), "utf8"),
-    readFile(path.join(harnessRoot, resolved.brand.memoryPath), "utf8"),
-    readFile(path.join(harnessRoot, resolved.product.memoryPath), "utf8"),
-    readFile(path.join(harnessRoot, resolved.contracts.experience.path), "utf8"),
-    readFile(path.join(harnessRoot, resolved.contracts.qa.path), "utf8"),
+    readFile(path.join(files.contractRoot, resolved.brand.configPath), "utf8"),
+    readFile(path.join(files.contractRoot, resolved.product.configPath), "utf8"),
+    readFile(path.join(files.contractRoot, resolved.contracts.design.path), "utf8"),
+    readFile(path.join(files.contractRoot, resolved.brand.tasteProfile.path), "utf8"),
+    readFile(path.join(files.memoryPolicyRoot, resolved.memoryPolicyPath), "utf8"),
+    readFile(path.join(files.contractRoot, resolved.brand.memoryPath), "utf8"),
+    readFile(path.join(files.contractRoot, resolved.product.memoryPath), "utf8"),
+    readFile(path.join(files.contractRoot, resolved.contracts.experience.path), "utf8"),
+    readFile(path.join(files.contractRoot, resolved.contracts.qa.path), "utf8"),
   ]);
+  const contractRef = (relativePath) => `${files.source.repository}:${relativePath}@${files.source.commit}`;
   return {
     runId,
-    repository: HARNESS_RELEASE_REPOSITORY,
-    sourceCommit: pins.harnessCommit,
-    brand: { id: resolved.brand.id, ref: resolved.brand.configPath, digest: rawContentDigest(brandConfig) },
+    repository: files.source.repository,
+    sourceCommit: files.source.commit,
+    harness: { repository: HARNESS_RELEASE_REPOSITORY, commit: pins.harnessCommit },
+    brand: { id: resolved.brand.id, ref: contractRef(resolved.brand.configPath), digest: rawContentDigest(brandConfig) },
     productProfile: {
       id: resolved.product.id,
       surface: resolved.product.surface,
-      ref: resolved.product.configPath,
+      ref: contractRef(resolved.product.configPath),
       digest: rawContentDigest(productConfig),
     },
-    design: { ref: resolved.contracts.design.ref, digest: rawContentDigest(design) },
-    taste: { ref: resolved.brand.tasteProfile.ref, digest: rawContentDigest(taste) },
+    design: { ref: `${resolved.contracts.design.ref}:${contractRef(resolved.contracts.design.path)}`, digest: rawContentDigest(design) },
+    taste: { ref: `${resolved.brand.tasteProfile.ref}:${contractRef(resolved.brand.tasteProfile.path)}`, digest: rawContentDigest(taste) },
     memory: {
-      policy: { ref: resolved.memoryPolicyPath, digest: rawContentDigest(memoryPolicy) },
-      brand: { ref: resolved.brand.memoryPath, digest: rawContentDigest(brandMemory) },
-      product: { ref: resolved.product.memoryPath, digest: rawContentDigest(productMemory) },
+      policy: {
+        ref: `${files.memoryPolicySource.repository}:${resolved.memoryPolicyPath}@${files.memoryPolicySource.commit}`,
+        digest: rawContentDigest(memoryPolicy),
+      },
+      brand: { ref: contractRef(resolved.brand.memoryPath), digest: rawContentDigest(brandMemory) },
+      product: { ref: contractRef(resolved.product.memoryPath), digest: rawContentDigest(productMemory) },
     },
-    experience: { ref: resolved.contracts.experience.ref, digest: rawContentDigest(experience) },
+    experience: { ref: `${resolved.contracts.experience.ref}:${contractRef(resolved.contracts.experience.path)}`, digest: rawContentDigest(experience) },
     productAdapter: { id: resolved.adapter.id, revision: `${resolved.environment}@${pins.productCommit}` },
     product: {
       repository: resolved.adapter.repository,
@@ -478,7 +491,84 @@ async function contractLock(runId, resolved) {
       },
       sanstudio: { repository: "sander217/sanstudio", commit: pins.byId.sanstudio.revision },
     },
-    qaPolicy: { ref: resolved.contracts.qa.ref, digest: rawContentDigest(qa) },
+    qaPolicy: { ref: `${resolved.contracts.qa.ref}:${contractRef(resolved.contracts.qa.path)}`, digest: rawContentDigest(qa) },
+  };
+}
+
+function mergeBindingTarget(request, binding) {
+  const aliases = { brand: "brandId", product: "productId", adapter: "adapterId", environment: "environment" };
+  const requested = request.target ?? {};
+  for (const [key, alias] of Object.entries(aliases)) {
+    const existing = requested[key] ?? request[alias];
+    if (existing && existing !== binding.target[key]) {
+      throw new Error(`Request ${key} conflicts with the Design Harness binding.`);
+    }
+  }
+  return { ...request, target: { ...binding.target } };
+}
+
+async function loadBindingContext(bindingPath) {
+  if (!bindingPath) return null;
+  const { binding, pack } = await readDesignHarnessBinding(bindingPath);
+  const config = {
+    schemaVersion: 1,
+    cache: {
+      environmentVariable: "DESIGN_HARNESS_CONTRACT_CACHE",
+      defaultDirectory: ".cache/design-harness-agent/contract-packs",
+    },
+    packs: [pack],
+  };
+  const cacheRoot = contractPackCacheRoot(config);
+  await assertExternalContractCache(cacheRoot, harnessRoot);
+  const verified = await syncContractPack(pack, cacheRoot);
+  if (verified.manifest.authority?.brand !== binding.target.brand) {
+    throw new Error("Design Harness binding brand does not match the contract pack authority.");
+  }
+  const catalog = await readJson(path.join(verified.sourcePath, verified.manifest.catalogPath), "Contract pack catalog");
+  return { binding, pack, verified, catalog };
+}
+
+async function resolveContractFiles(catalog, resolved, bindingContext) {
+  if (bindingContext) {
+    return {
+      contractRoot: bindingContext.verified.sourcePath,
+      memoryPolicyRoot: bindingContext.verified.sourcePath,
+      source: {
+        id: bindingContext.pack.id,
+        repository: normalizeRepository(bindingContext.pack.repository),
+        baseBranch: bindingContext.pack.baseBranch,
+        commit: bindingContext.pack.revision,
+      },
+      memoryPolicySource: {
+        repository: normalizeRepository(bindingContext.pack.repository),
+        commit: bindingContext.pack.revision,
+      },
+    };
+  }
+  const harnessCommit = await resolveHarnessReleaseCommit({ root: harnessRoot });
+  if (!resolved.brand.sourceId) {
+    return {
+      contractRoot: harnessRoot,
+      memoryPolicyRoot: harnessRoot,
+      source: { id: null, repository: HARNESS_RELEASE_REPOSITORY, baseBranch: "main", commit: harnessCommit },
+      memoryPolicySource: { repository: HARNESS_RELEASE_REPOSITORY, commit: harnessCommit },
+    };
+  }
+  const source = catalog.sources?.find((entry) => entry.id === resolved.brand.sourceId);
+  if (!source) throw new Error(`Catalog is missing contract source ${resolved.brand.sourceId}.`);
+  const config = await readContractPackConfig(path.join(harnessRoot, "config", "contract-packs.json"));
+  const pack = config.packs.find((entry) => entry.id === source.id);
+  if (!pack || normalizeRepository(pack.repository) !== source.repository || pack.revision !== source.commit) {
+    throw new Error(`Contract source ${source.id} does not match the configured immutable pin.`);
+  }
+  const cacheRoot = contractPackCacheRoot(config);
+  await assertExternalContractCache(cacheRoot, harnessRoot);
+  const verified = await syncContractPack(pack, cacheRoot);
+  return {
+    contractRoot: verified.sourcePath,
+    memoryPolicyRoot: harnessRoot,
+    source,
+    memoryPolicySource: { repository: HARNESS_RELEASE_REPOSITORY, commit: harnessCommit },
   };
 }
 
@@ -489,14 +579,20 @@ async function completeBuiltInStage(store, run, stage, content, metadata = {}) {
 }
 
 async function start(options, store) {
-  const request = await readJson(requireOption(options, "request", "--request"), "Design request");
+  const rawRequest = await readJson(requireOption(options, "request", "--request"), "Design request");
+  const bindingContext = await loadBindingContext(options.binding);
+  const request = bindingContext ? mergeBindingTarget(rawRequest, bindingContext.binding) : rawRequest;
   const mode = request.mode ?? "delivery";
   if (!["proposal", "delivery", "dry-run"].includes(mode)) {
     throw new Error("Request mode must be proposal, delivery, or dry-run.");
   }
   ensureAgentDependencies();
-  const catalog = await readJson(path.join(harnessRoot, "config", "product-catalog.generated.json"), "Product catalog");
+  const catalog = bindingContext?.catalog ?? await readJson(path.join(harnessRoot, "config", "product-catalog.generated.json"), "Product catalog");
   const resolved = resolveCatalogTarget(catalog, request, mode === "delivery");
+  if ((resolved.brand.sourceId ?? null) !== (resolved.product.sourceId ?? null)) {
+    throw new Error("Brand and product must come from the same contract pack.");
+  }
+  const files = await resolveContractFiles(catalog, resolved, bindingContext);
   const id = randomUUID();
   const now = new Date().toISOString();
   const intake = normalizeRequest(request, id, now, resolved);
@@ -515,7 +611,7 @@ async function start(options, store) {
     "analyze",
     analyzeChangeRequest(intake.request.prompt, resolved.product.journeyRouting),
   );
-  const lock = await contractLock(id, resolved);
+  const lock = await contractLock(id, resolved, files);
   run = await completeBuiltInStage(store, run, "compile-contract-lock", lock, {
     immutable: true,
     brandId: lock.brand.id,

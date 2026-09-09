@@ -4,7 +4,9 @@ This repository is a portfolio-level control plane and installable `design-harne
 
 ## Authority
 
-- `portfolio.yml` registers brands, products, adapters, shared capabilities, and memory policy.
+- A private Contract Pack owns brand/product contracts, adapters, scenarios, and durable memory for one access domain.
+- A product repository may bind exactly one pack at one immutable commit through `.design-harness/target.yml`.
+- The bundled `portfolio.yml` is a neutral example and fallback for unbound evaluation.
 - A brand owns identity, visual language, voice, taste, and brand memory.
 - A product inherits its brand and owns platform-specific experience, QA, and product memory.
 - An adapter binds one product to an exact repository, base branch, revision, runtime, and environment.
@@ -14,7 +16,7 @@ This repository is a portfolio-level control plane and installable `design-harne
 
 Treat `Use the connected Design Harness.` as the canonical request. Use `skills/design-harness-agent/SKILL.md`; do not require the user to invoke internal stages separately.
 
-Resolve targets from `config/product-catalog.generated.json`. Regenerate it whenever brand, product, or adapter YAML changes. Verify immutable external dependencies before use. Connected MCP credentials are client configuration; never store credentials in this repository.
+When a product binding exists, validate and sync it with `scripts/sync-contract-packs.mjs`, then resolve the target from that pack's generated catalog. Read only that returned read-only checkout; never enumerate or fall back to another private pack. Without a binding, resolve the neutral example from `config/product-catalog.generated.json`. Verify immutable external dependencies before use. Connected MCP credentials are client configuration; never store credentials in this repository.
 
 The included Atlas portfolio and `example/atlas-web` adapter are fictional. Refuse delivery until the adopter replaces them with exact, verified product configuration.
 

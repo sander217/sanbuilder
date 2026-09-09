@@ -14,6 +14,7 @@
     "generate:schema-validators": "node scripts/generate-schema-validators.mjs",
     "validate:plugin": "node scripts/validate-public-package.mjs",
     "sync:agent-dependencies": "node scripts/sync-agent-dependencies.mjs sync",
+    "sync:contract-pack": "node scripts/sync-contract-packs.mjs sync",
     "design-agent": "node scripts/design-agent-run.mjs",
     "test:core": "node --test tests/public-core.test.mjs",
     "test": "npm run validate:plugin && npm run validate:catalog && npm run validate:schemas && npm run test:core"
