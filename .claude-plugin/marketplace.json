@@ -1,0 +1,17 @@
+{
+  "name": "sanbuilder",
+  "owner": {
+    "name": "Sander Chen"
+  },
+  "description": "Product-neutral, taste-aware design-agent workflows.",
+  "plugins": [
+    {
+      "name": "design-harness-agent",
+      "source": {
+        "source": "github",
+        "repo": "sander217/sanbuilder"
+      },
+      "description": "Run Sanbuilder as one brand-aware evidence-to-PR workflow."
+    }
+  ]
+}

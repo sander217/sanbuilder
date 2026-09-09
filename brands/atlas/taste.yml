@@ -1,0 +1,37 @@
+schema: 1
+id: atlas-taste
+brand: atlas
+status: active
+
+intent:
+  - The workspace should feel calm, capable, and direct.
+  - Primary work should remain more prominent than navigation or decoration.
+  - Consequence, progress, and recovery should be easy to understand.
+
+signatureTraits:
+  - quiet neutral canvas
+  - one restrained accent color
+  - explicit action hierarchy
+  - purposeful spacing
+  - visible state and recovery cues
+
+avoid:
+  - generic AI gradients
+  - decorative sparkle motifs
+  - excessive floating cards
+  - hidden consequential actions
+  - visuals that cannot survive production states
+
+referencePolicy:
+  mobbinRole: interaction-precedent
+  galleryRole: art-direction-inspiration
+  productionRole: product-truth
+  copyReferencesLiterally: false
+
+learningPolicy:
+  sources:
+    - approved-proposal
+    - rejected-direction-with-human-reason
+    - shipped-product-qa
+  requireHumanDecision: true
+  rawAgentPreferenceIsAuthority: false

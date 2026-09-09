@@ -1,0 +1,43 @@
+schema: 1
+id: atlas-web
+version: 1.0.0
+
+gates:
+  contract-lint:
+    severity: blocking
+    phases: [design]
+  experience-completeness:
+    severity: blocking
+    phases: [design]
+  accessibility:
+    severity: blocking
+    standard: WCAG-2.2-AA
+    phases: [design, product]
+  responsive:
+    severity: blocking
+    phases: [design, product]
+  native-suites:
+    severity: blocking
+    phases: [product]
+  visual-comparison:
+    severity: review
+    phases: [design, product]
+
+coverage:
+  modes: [structure, interaction, visual, production]
+  viewports:
+    desktop: 1440x900
+    tablet: 1024x768
+    mobile: 390x844
+  locales: [en]
+  states:
+    required: [default, loading, empty, error]
+    whenApplicable: [disabled, approval-required, progress, recoverable]
+
+federation:
+  atlas-web:
+    suites:
+      - npm test
+
+waivers:
+  allowed: false

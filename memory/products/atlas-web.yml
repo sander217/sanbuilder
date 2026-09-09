@@ -1,0 +1,16 @@
+schema: 1
+scope: product
+subject: atlas-web
+
+decisions:
+  - id: guided-task-consequence-and-recovery
+    status: accepted
+    statement: Guided operations expose approval, progress, cancellation, and recovery states.
+    rationale: This demonstrates the shape of a durable product-level behavior decision.
+    source:
+      kind: contract
+      ref: atlas-web@1.0.0
+    confidence: high
+    appliesTo:
+      - guided-task
+    reviewWhen: The fictional sample is replaced with real product evidence.
