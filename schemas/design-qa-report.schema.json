@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sander217/sanbuilder/schemas/design-qa-report.schema.json",
+  "title": "Design Harness Design QA Report",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "runId",
+    "proposalDigest",
+    "qaPolicy",
+    "status",
+    "summary",
+    "checks",
+    "createdAt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "artifactType": { "const": "design-qa-report" },
+    "runId": { "type": "string", "minLength": 1 },
+    "proposalDigest": { "$ref": "#/$defs/digest" },
+    "qaPolicy": {
+      "type": "object",
+      "required": ["ref", "digest"],
+      "properties": {
+        "ref": { "type": "string", "minLength": 1 },
+        "digest": { "$ref": "#/$defs/digest" }
+      },
+      "additionalProperties": false
+    },
+    "status": { "enum": ["passed", "failed", "review"] },
+    "summary": { "type": "string", "minLength": 1 },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/check" }
+    },
+    "createdAt": { "type": "string", "format": "date-time" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "passed" } }, "required": ["status"] },
+      "then": {
+        "properties": {
+          "checks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": { "status": { "const": "passed" } },
+              "required": ["status"]
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "check": {
+      "type": "object",
+      "required": ["id", "policyGateId", "label", "severity", "status", "summary"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "policyGateId": { "type": "string", "minLength": 1 },
+        "label": { "type": "string", "minLength": 1 },
+        "severity": { "enum": ["blocking", "review"] },
+        "status": { "enum": ["passed", "failed", "partial", "skipped"] },
+        "summary": { "type": "string", "minLength": 1 },
+        "evidenceArtifactDigests": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/digest" },
+          "uniqueItems": true
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "severity": { "const": "blocking" } }, "required": ["severity"] },
+          "then": { "properties": { "status": { "enum": ["passed", "failed"] } } }
+        }
+      ],
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

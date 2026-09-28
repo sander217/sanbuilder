@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sander217/sanbuilder/schemas/approval-record.schema.json",
+  "title": "Design Harness Proposal Approval Record",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "runId",
+    "proposalDigest",
+    "contractLockDigest",
+    "status",
+    "decidedBy",
+    "decidedAt",
+    "decisionDigest"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "artifactType": { "const": "approval-record" },
+    "runId": { "type": "string", "minLength": 1 },
+    "proposalDigest": { "$ref": "#/$defs/digest" },
+    "contractLockDigest": { "$ref": "#/$defs/digest" },
+    "status": { "enum": ["approved", "rejected"] },
+    "decidedBy": { "type": "string", "minLength": 1 },
+    "decidedAt": { "type": "string", "format": "date-time" },
+    "decisionDigest": { "$ref": "#/$defs/digest" },
+    "note": { "type": "string" }
+  },
+  "$defs": {
+    "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,80 @@
+schema: 1
+id: sanstudio
+product: SanStudio Proposal
+status: workflow
+repository: sander217/sanstudio
+workspaceRepository: sanstudio
+defaultRevision: main
+baseBranch: main
+verifiedRevision: 3217439e9d5437b50daeca5e8efab20da30d8422
+role:
+  - design-workflow
+  - proposal-authority
+
+defaultEnvironment: proposal
+environments:
+  proposal:
+    writable: false
+
+delivery:
+  enabled: false
+
+gates:
+  fast:
+    - context-lock
+    - design-qa
+  standard:
+    - context-lock
+    - direction-lock
+    - design-lock
+    - design-qa
+  major:
+    - context-lock
+    - direction-lock
+    - design-lock
+    - production-lock
+    - design-qa
+
+gateContracts:
+  gate3:
+    stage: design-lock
+    purpose: Turn the confirmed direction into a reviewable, implementation-oriented design decision.
+    output:
+      artifact: design-proposal
+      schema: schemas/design-proposal.schema.json
+      requiredStatus: ready-for-approval
+      approvalRequired: true
+      approvalBinding: proposal-digest
+      productTruth: production-code
+      requiredSections:
+        - inputLocks
+        - directionSet
+        - userFlows
+        - stateMatrix
+        - responsiveMatrix
+        - accessibilityRequirements
+        - componentPlan
+        - acceptanceCriteria
+        - nonGoals
+        - evidenceIds
+    previews:
+      allowed: true
+      authority: non-authoritative-reference
+      formats:
+        - image
+        - figma
+        - html
+
+artifacts:
+  - DESIGN.md
+  - design-proposal
+  - proposal-package
+  - interaction-spec
+  - decision-record
+  - production-completeness-matrix
+
+restrictions:
+  - sanstudio-shell-is-not-product-runtime
+  - standalone-mock-html-is-never-product-truth
+  - mock-html-may-only-be-a-non-authoritative-proposal-preview
+  - proposed-contract-diffs-require-owner-approval

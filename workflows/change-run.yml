@@ -1,0 +1,187 @@
+schema: 2
+id: product-change-run
+authority: lib/harness.ts
+
+laneUpgradePolicy:
+  direction: stricter-only
+  latestStage: context-lock
+  lateExpansion: start-new-run
+
+# The TypeScript graph is executable. This file is its reviewable contract and
+# validate:harness fails whenever the two representations drift.
+lanes:
+  fast:
+    entry: intake
+    nodes:
+      - intake
+      - analyze
+      - compile-contract-lock
+      - research
+      - context-lock
+      - build-proposal
+      - design-qa
+      - human-approval
+      - implementation
+      - product-qa
+      - product-pr
+      - figma-backup
+
+  standard:
+    entry: intake
+    nodes:
+      - intake
+      - analyze
+      - compile-contract-lock
+      - research
+      - context-lock
+      - direction-lock
+      - design-lock
+      - build-proposal
+      - design-qa
+      - human-approval
+      - implementation
+      - product-qa
+      - product-pr
+      - figma-backup
+
+  major:
+    entry: intake
+    nodes:
+      - intake
+      - analyze
+      - compile-contract-lock
+      - research
+      - context-lock
+      - direction-lock
+      - design-lock
+      - production-lock
+      - build-proposal
+      - design-qa
+      - human-approval
+      - implementation
+      - product-qa
+      - product-pr
+      - figma-backup
+
+nodes:
+  intake:
+    handler: coordinator
+    output: intake
+    blocking: true
+  analyze:
+    handler: coordinator
+    input: [intake]
+    output: change-analysis
+    blocking: true
+  compile-contract-lock:
+    handler: coordinator
+    input: [change-analysis]
+    output: contract-lock
+    immutable: true
+    blocking: true
+    maxAttempts: 2
+  research:
+    handler: research-synthesis
+    input: [intake, contract-lock]
+    output: research-report
+    blocking: true
+    maxAttempts: 2
+  context-lock:
+    handler: sanstudio-context-lock
+    input: [intake, contract-lock, research-report]
+    output: context-lock
+    blocking: true
+    maxAttempts: 2
+  direction-lock:
+    handler: sanstudio-direction-lock
+    input: [context-lock, research-report]
+    output: direction-proposal
+    blocking: true
+    maxAttempts: 2
+  design-lock:
+    handler: sanstudio-design-lock
+    input: [context-lock, research-report]
+    output: design-proposal
+    blocking: true
+    maxAttempts: 2
+  production-lock:
+    handler: sanstudio-production-lock
+    input: [design-proposal, contract-lock]
+    output: production-package
+    blocking: true
+    maxAttempts: 2
+  build-proposal:
+    handler: coordinator
+    input: [contract-lock, research-report, taste-profile, brand-memory, product-memory, lane-design-artifacts, affected-scenarios]
+    output: proposal-package
+    directionPolicy:
+      defaultCount: 3
+      meaningfulDifferenceRequired: true
+      fastLaneMayUseOne: true
+      previewAuthority: non-authoritative-reference
+    blocking: true
+    maxAttempts: 2
+  design-qa:
+    handler: harness-design-qa
+    input: [proposal-package, qa-policy]
+    output: design-qa-report
+    subject: proposal-package
+    blocking: true
+    onFailure: build-proposal
+    maxAttempts: 2
+  human-approval:
+    handler: human
+    input: [proposal-package, design-qa-report]
+    output: approval-record
+    subject: proposal-package
+    humanGate: true
+    blocking: true
+  implementation:
+    handler: active-product-executor
+    input: [approval-record, proposal-package, contract-lock]
+    output: implementation-result
+    writesProduct: true
+    requiresApproval: true
+    isolatedBranch: true
+    blocking: true
+    maxAttempts: 2
+  product-qa:
+    handler: active-product-qa
+    input: [implementation-result, qa-policy, affected-scenarios]
+    output: product-qa-report
+    subject: implementation-result
+    requiresApproval: true
+    blocking: true
+    onFailure: implementation
+    maxAttempts: 2
+    memoryPolicy:
+      output: proposed-updates-only
+      publishAutomatically: false
+      scopes: [product, brand]
+  product-pr:
+    handler: github-draft-pr
+    input: [implementation-result, product-qa-report, approval-record]
+    output: product-pr
+    subject: product-qa-report
+    requiresApproval: true
+    writesProduct: true
+    draftOnly: true
+    blocking: true
+    maxAttempts: 2
+  figma-backup:
+    handler: figma-backup
+    input: [product-pr, proposal-package]
+    output: figma-backup
+    subject: product-pr
+    requiresApproval: true
+    destinationAuthorization:
+      scope: exact-figma-file
+      bindsTo: product-pr-digest
+      absentBehavior: server-side-skip-without-dispatch
+    optional: true
+    blocking: false
+
+terminal:
+  success: figma-backup
+  successWithWarning: figma-backup
+  blocked: stage-retry-exhausted

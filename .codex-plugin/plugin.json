@@ -1,0 +1,29 @@
+{
+  "name": "design-harness-agent",
+  "version": "0.2.0",
+  "description": "Run a product-neutral, taste-aware design pipeline from evidence and alternatives through approved implementation and QA.",
+  "skills": "./skills/",
+  "author": {
+    "name": "Sander Chen"
+  },
+  "repository": "https://github.com/sander217/sanbuilder",
+  "homepage": "https://github.com/sander217/sanbuilder#readme",
+  "interface": {
+    "displayName": "Sanbuilder Design Harness",
+    "shortDescription": "Taste-aware product design, implementation, and QA.",
+    "longDescription": "Resolve brand and product context, learn from scoped design memory, generate distinct product-native directions, wait for exact approval, then implement and report QA evidence.",
+    "developerName": "Sander Chen",
+    "category": "Productivity",
+    "capabilities": [
+      "Taste-aware design research",
+      "Multiple product-native directions",
+      "Scoped design memory",
+      "Approval-gated implementation",
+      "Product QA"
+    ],
+    "defaultPrompt": [
+      "Use the connected Design Harness.",
+      "Use the connected Design Harness to explore three product-native design directions before implementation."
+    ]
+  }
+}

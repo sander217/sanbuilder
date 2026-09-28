@@ -1,0 +1,26 @@
+schema: 1
+
+scenarios:
+  - id: atlas-library-empty
+    adapter: atlas-web
+    journey: work-library
+    userGoal: Create the first item from a clear empty state.
+    url: /library
+    states: [empty, create-open]
+    modes: [structure, visual, production]
+    viewports: [desktop, mobile]
+    assertions:
+      - one-primary-create-action
+      - clear-next-step
+
+  - id: atlas-guided-task-approval
+    adapter: atlas-web
+    journey: guided-task
+    userGoal: Understand and approve a consequential automated action.
+    url: /guided-task
+    states: [ready, approval-required, active, recoverable]
+    modes: [interaction, production]
+    viewports: [desktop, mobile]
+    assertions:
+      - consequence-visible-before-approval
+      - cancellation-and-recovery-available

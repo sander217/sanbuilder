@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sander217/sanbuilder/schemas/research-report.schema.json",
+  "title": "Design Harness Design Research Report",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "runId",
+    "intakeDigest",
+    "researchDependency",
+    "mode",
+    "status",
+    "summary",
+    "findings",
+    "evidence",
+    "gaps",
+    "createdAt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "artifactType": { "const": "research-report" },
+    "runId": { "type": "string", "minLength": 1 },
+    "intakeDigest": { "$ref": "#/$defs/digest" },
+    "researchDependency": {
+      "type": "object",
+      "required": ["repository", "revision", "skill"],
+      "properties": {
+        "repository": { "const": "sander217/research-synthesis" },
+        "revision": { "$ref": "#/$defs/gitCommit" },
+        "skill": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "mode": { "enum": ["synthesize", "explore", "evaluate", "refresh"] },
+    "status": { "enum": ["complete", "partial", "blocked"] },
+    "summary": { "type": "string", "minLength": 1 },
+    "findings": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/finding" }
+    },
+    "evidence": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/evidence" }
+    },
+    "gaps": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "tools": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "purpose"],
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "purpose": { "type": "string", "minLength": 1 },
+          "revision": { "type": "string", "minLength": 1 }
+        },
+        "additionalProperties": false
+      }
+    },
+    "createdAt": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "gitCommit": { "type": "string", "pattern": "^[a-f0-9]{40}$" },
+    "finding": {
+      "type": "object",
+      "required": ["id", "statement", "confidence", "evidenceIds", "designImplication"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "statement": { "type": "string", "minLength": 1 },
+        "confidence": { "enum": ["high", "medium", "low"] },
+        "evidenceIds": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string", "minLength": 1 },
+          "uniqueItems": true
+        },
+        "designImplication": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": false
+    },
+    "evidence": {
+      "type": "object",
+      "required": ["id", "kind", "title", "source", "digest", "observedAt"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "kind": { "enum": ["intake", "product", "mobbin", "a1-gallery", "figma", "web", "repository", "other"] },
+        "title": { "type": "string", "minLength": 1 },
+        "source": { "type": "string", "minLength": 1 },
+        "digest": { "$ref": "#/$defs/digest" },
+        "excerpt": { "type": "string" },
+        "observedAt": { "type": "string", "format": "date-time" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sander217/sanbuilder/schemas/harness-scenario.schema.json",
+  "title": "Design Harness Scenario",
+  "type": "object",
+  "required": ["id", "adapter", "journey", "userGoal", "url", "states", "modes", "viewports", "assertions"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "adapter": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "journey": { "type": "string", "minLength": 1 },
+    "userGoal": { "type": "string", "minLength": 1 },
+    "url": { "type": "string", "pattern": "^/h/" },
+    "states": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "modes": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "enum": ["structure", "interaction", "visual", "production"] }
+    },
+    "viewports": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "enum": ["desktop", "tablet", "mobile"] }
+    },
+    "assertions": { "type": "array", "minItems": 1, "items": { "type": "string" } }
+  },
+  "additionalProperties": true
+}

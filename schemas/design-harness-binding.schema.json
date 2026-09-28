@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sander217/sanbuilder/schemas/design-harness-binding.schema.json",
+  "title": "Design Harness Product Binding",
+  "type": "object",
+  "required": ["schema", "contractPack", "target"],
+  "properties": {
+    "schema": { "const": 1 },
+    "contractPack": {
+      "type": "object",
+      "required": ["id", "repository", "baseBranch", "revision"],
+      "properties": {
+        "id": { "$ref": "#/$defs/slug" },
+        "repository": { "$ref": "#/$defs/repository" },
+        "baseBranch": { "const": "main" },
+        "revision": { "$ref": "#/$defs/gitCommit" }
+      },
+      "additionalProperties": false
+    },
+    "target": {
+      "type": "object",
+      "required": ["brand", "product", "adapter", "environment"],
+      "properties": {
+        "brand": { "$ref": "#/$defs/slug" },
+        "product": { "$ref": "#/$defs/slug" },
+        "adapter": { "$ref": "#/$defs/slug" },
+        "environment": { "$ref": "#/$defs/slug" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "repository": {
+      "type": "string",
+      "pattern": "^(?:https://github\\.com/)?[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+(?:\\.git)?$"
+    },
+    "gitCommit": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    }
+  },
+  "additionalProperties": false
+}

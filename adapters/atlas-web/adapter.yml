@@ -1,0 +1,68 @@
+schema: 1
+id: atlas-web
+product: Atlas Web Example
+brand: atlas
+productId: atlas-web
+surface: web-app
+status: active
+framework: next
+repository: example/atlas-web
+workspaceRepository: atlas-web
+defaultRevision: main
+baseBranch: main
+verifiedRevision: "1111111111111111111111111111111111111111"
+role:
+  - sample-product
+
+defaultEnvironment: example
+environments:
+  example:
+    baseUrl: http://localhost:3000
+    writable: approval-gated
+
+delivery:
+  enabled: true
+
+runtime:
+  start: npm run dev
+  localBaseUrl: http://localhost:3000
+
+nativeCommands:
+  install: npm ci
+  start: npm run dev
+  lint: npm run lint
+  test: npm test
+  build: npm run build
+
+writePolicy:
+  beforeApproval:
+    access: read-only
+  approval:
+    required: true
+    binding: design-proposal-digest
+  afterApproval:
+    access: isolated-branch-write
+    baseBranch: main
+    branchPrefix: codex/
+    scope: approved-proposal-only
+  pullRequest:
+    mode: draft-only
+    autoMerge: false
+    mergeAuthority: human
+
+capabilities:
+  routeAddressing: true
+  productionUiReuse: required
+  productWrites: approval-gated-isolated-branch
+  pullRequests: draft-only
+
+journeys:
+  - work-library
+  - guided-task
+
+restrictions:
+  - replace-this-sample-before-delivery
+  - do-not-copy-production-ui-into-harness
+  - no-product-write-before-digest-bound-approval
+  - no-direct-write-to-main
+  - no-auto-merge

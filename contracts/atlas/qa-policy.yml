@@ -1,0 +1,52 @@
+schema: 1
+id: atlas-web
+version: 1.1.0
+
+gates:
+  contract-lint:
+    severity: blocking
+    phases: [design]
+  experience-completeness:
+    severity: blocking
+    phases: [design]
+  accessibility:
+    severity: blocking
+    standard: WCAG-2.2-AA
+    phases: [design, product]
+  responsive:
+    severity: blocking
+    phases: [design, product]
+  navigation-stability:
+    severity: blocking
+    phases: [design, product]
+    rule: UI-NAV-001
+    scope: Affected page headers and forward/back navigation within the same header family.
+    criteria:
+      - Compare header height, title start/baseline, and back/action alignment under matching viewport, safe-area, text-scale, locale, and scroll conditions.
+      - No unintended title jump during navigation, loading, or font/icon settling; product QA includes transition evidence.
+      - Long titles, enlarged text, reduced motion, and documented header variants remain accessible and predictable.
+  native-suites:
+    severity: blocking
+    phases: [product]
+  visual-comparison:
+    severity: review
+    phases: [design, product]
+
+coverage:
+  modes: [structure, interaction, visual, production]
+  viewports:
+    desktop: 1440x900
+    tablet: 1024x768
+    mobile: 390x844
+  locales: [en]
+  states:
+    required: [default, loading, empty, error]
+    whenApplicable: [disabled, approval-required, progress, recoverable]
+
+federation:
+  atlas-web:
+    suites:
+      - npm test
+
+waivers:
+  allowed: false

@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sander217/sanbuilder/schemas/product-pr.schema.json",
+  "title": "Design Harness Product Draft Pull Request",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "artifactType",
+    "runId",
+    "proposalDigest",
+    "approvalDigest",
+    "implementationResultDigest",
+    "qaReportDigest",
+    "repository",
+    "baseBranch",
+    "headBranch",
+    "headCommit",
+    "number",
+    "url",
+    "title",
+    "draft",
+    "autoMerge",
+    "mergeAuthority",
+    "status",
+    "createdAt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "artifactType": { "const": "product-pr" },
+    "runId": { "type": "string", "minLength": 1 },
+    "proposalDigest": { "$ref": "#/$defs/digest" },
+    "approvalDigest": { "$ref": "#/$defs/digest" },
+    "implementationResultDigest": { "$ref": "#/$defs/digest" },
+    "qaReportDigest": { "$ref": "#/$defs/digest" },
+    "repository": { "type": "string", "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$" },
+    "baseBranch": { "type": "string", "minLength": 1 },
+    "headBranch": { "type": "string", "pattern": "^codex/[a-z0-9._/-]+$" },
+    "headCommit": { "$ref": "#/$defs/gitCommit" },
+    "number": { "type": "integer", "minimum": 1 },
+    "url": { "type": "string", "format": "uri" },
+    "title": { "type": "string", "minLength": 1, "maxLength": 256 },
+    "bodyDigest": { "$ref": "#/$defs/digest" },
+    "draft": { "const": true },
+    "autoMerge": { "const": false },
+    "mergeAuthority": { "const": "human" },
+    "status": { "const": "draft" },
+    "createdAt": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "gitCommit": { "type": "string", "pattern": "^[a-f0-9]{40}$" }
+  },
+  "additionalProperties": false
+}
