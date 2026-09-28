@@ -5,7 +5,7 @@ status: active
 
 designContract:
   id: atlas-brand-design
-  ref: atlas-brand@1.0.0
+  ref: atlas-brand@1.2.0
   path: contracts/atlas/DESIGN.md
   owner: design-systems
   description: Fictional sample identity, tokens, and brand behavior.

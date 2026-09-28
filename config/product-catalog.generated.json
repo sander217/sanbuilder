@@ -145,7 +145,7 @@
   "contracts": [
     {
       "id": "atlas-brand-design",
-      "ref": "atlas-brand@1.0.0",
+      "ref": "atlas-brand@1.2.0",
       "path": "contracts/atlas/DESIGN.md",
       "owner": "design-systems",
       "description": "Fictional sample identity, tokens, and brand behavior.",
@@ -169,7 +169,7 @@
     },
     {
       "id": "atlas-web-qa",
-      "ref": "atlas-web-qa@1.0.0",
+      "ref": "atlas-web-qa@1.1.0",
       "path": "contracts/atlas/qa-policy.yml",
       "owner": "product-qa",
       "description": "Fictional sample design and product quality gates.",

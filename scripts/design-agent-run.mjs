@@ -24,7 +24,9 @@ import {
   createCoordinatorRun,
   failCurrentStage,
   upgradeCoordinatorLane,
+  resolveLockedRunTarget,
 } from "../lib/coordinator.ts";
+import { parseQaPolicyGates } from "../lib/run-validation.ts";
 import { assertImplementationContinuation } from "../lib/implementation.ts";
 import { HARNESS_RELEASE_REPOSITORY, resolveHarnessReleaseCommit } from "../lib/release-provenance.mjs";
 import {
@@ -279,6 +281,17 @@ async function loadRun(store, runId) {
   return readJson(path.join(runDirectory(store, runId), "run.json"), "Run state");
 }
 
+async function loadLockedContext(store, run) {
+  const reference = run.artifacts["compile-contract-lock"];
+  if (!reference?.digest || !reference.uri) throw new Error("Run has no immutable contract lock.");
+  const expectedPath = path.join(runDirectory(store, run.id), "artifacts", `compile-contract-lock-${reference.digest.slice(7, 19)}.json`);
+  if (path.resolve(reference.uri) !== expectedPath) throw new Error("Contract lock must belong to this run's artifact store.");
+  const lock = await readJson(expectedPath, "Contract lock");
+  if (digest(lock) !== reference.digest) throw new Error("Contract lock content does not match its pinned digest.");
+  resolveLockedRunTarget(run, lock);
+  return lock;
+}
+
 async function saveRun(store, run) {
   await writeJson(path.join(runDirectory(store, run.id), "run.json"), run);
 }
@@ -491,7 +504,11 @@ async function contractLock(runId, resolved, files) {
       },
       sanstudio: { repository: "sander217/sanstudio", commit: pins.byId.sanstudio.revision },
     },
-    qaPolicy: { ref: `${resolved.contracts.qa.ref}:${contractRef(resolved.contracts.qa.path)}`, digest: rawContentDigest(qa) },
+    validationTarget: {
+      environment: resolved.environment,
+      deliveryEnabled: resolved.adapter.deliveryEnabled && resolved.adapter.environments[resolved.environment].writable === "approval-gated",
+    },
+    qaPolicy: { ref: `${resolved.contracts.qa.ref}:${contractRef(resolved.contracts.qa.path)}`, digest: rawContentDigest(qa), gates: parseQaPolicyGates(qa) },
   };
 }
 
@@ -671,7 +688,8 @@ async function submit(options, store) {
     else activeRun = { ...run, implementationTarget: candidate };
   }
   const subjectDigest = subjectDigestFor(activeRun, stage, content);
-  assertStageArtifactContent(activeRun, stage, content);
+  const lockedContext = await loadLockedContext(store, activeRun);
+  assertStageArtifactContent(activeRun, stage, content, lockedContext);
   const metadata = {
     ...(stage === "build-proposal" ? { contractLockDigest: run.artifacts["compile-contract-lock"].digest } : {}),
     ...(["research", "design-qa", "implementation", "product-qa", "figma-backup"].includes(stage)
@@ -716,6 +734,7 @@ async function begin(options, store) {
   const run = await loadRun(store, requireOption(options, "run", "--run"));
   let activeRun = run;
   if (run.currentStage === "implementation") {
+    resolveLockedRunTarget(run, await loadLockedContext(store, run), true);
     const baseCommit = run.artifacts["compile-contract-lock"]?.metadata?.productCommit;
     if (!/^[a-f0-9]{40}$/.test(baseCommit ?? "")) {
       throw new Error("Implementation cannot start without the pinned product base commit.");

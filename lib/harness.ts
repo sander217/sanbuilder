@@ -82,11 +82,13 @@ export const QA_POLICY_GATES: Record<QaPhase, Readonly<Record<string, QaGateSeve
     "experience-completeness": "blocking",
     accessibility: "blocking",
     responsive: "blocking",
+    "navigation-stability": "blocking",
     "visual-comparison": "review",
   },
   product: {
     accessibility: "blocking",
     responsive: "blocking",
+    "navigation-stability": "blocking",
     "native-suites": "blocking",
     "visual-comparison": "review",
     "uat-release": "blocking",
@@ -114,7 +116,8 @@ export interface ContractLockSnapshot {
     research: { repository: string; commit: string };
     sanstudio: { repository: string; commit: string };
   };
-  qaPolicy: { ref: string; digest: string };
+  validationTarget?: { environment: string; deliveryEnabled: boolean };
+  qaPolicy: { ref: string; digest: string; gates?: Record<QaPhase, Record<string, QaGateSeverity>> };
 }
 
 export interface ChangeAnalysis {

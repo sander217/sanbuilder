@@ -18,7 +18,7 @@ contracts:
     description: Fictional sample journeys, objects, states, and recovery behavior.
   qa:
     id: atlas-web-qa
-    ref: atlas-web-qa@1.0.0
+    ref: atlas-web-qa@1.1.0
     path: contracts/atlas/qa-policy.yml
     owner: product-qa
     description: Fictional sample design and product quality gates.

@@ -79,6 +79,14 @@ node <plugin-root>/scripts/design-agent-run.mjs fail --run <run-id> --reason <co
 
 The coordinator enforces stage order, attempt limits, artifact lineage, and post-approval gates. Never bypass it by writing a later artifact directly.
 
+### Bound target and QA policy continuity
+
+New portable runs snapshot the resolved environment/write capability and both phase-specific QA gate sets inside the immutable contract lock. `submit` verifies that lock's stored content digest and validates against its product identity and policy, not the installation's bundled catalog. `implementation begin` performs the same check before granting a target. A missing or changed lock fails closed.
+
+Legacy portable locks without `validationTarget` and `qaPolicy.gates` remain readable through `status`, but cannot submit new artifacts or acquire implementation with this runtime. Start a new run with the original exact binding; do not rewrite a legacy lock or reuse its approval against the new digest.
+
+The package-free portable policy reader accepts the canonical YAML `gates:` mapping: two-space plain gate IDs, four-space `severity: blocking` or `severity: review`, and `phases: [design, product]` (or a six-space block list). Each gate must name its severity and at least one phase. Duplicate gates/fields, aliases/merge keys at the gate boundary, unsupported phase syntax, and empty design/product policies are errors, not permission to fall back to default gates. Other descriptive gate fields do not affect enforcement. Both the policy source digest and compiled rules are pinned in the lock.
+
 If research or Context Lock discovers a material scope expansion, upgrade the run before submitting that stage:
 
 ```bash

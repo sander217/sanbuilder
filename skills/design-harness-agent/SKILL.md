@@ -64,6 +64,16 @@ Production code remains implementation truth. A lower layer may extend a higher 
 
 Read [references/memory-and-taste.md](references/memory-and-taste.md) whenever using prior preference, recording feedback, comparing directions, or proposing durable memory.
 
+When designing, implementing, or reviewing page headers or navigation, read [references/navigation-stability.md](references/navigation-stability.md). Apply `UI-NAV-001`: equivalent page headers share stable title and control geometry across forward/back navigation and loading states. Include the rule in the proposal and affected design/product QA; record product-specific variants in the owning Contract Pack.
+
+When designing, implementing, or reviewing pills, chips, status tags, filters, or pill-shaped segmented options, read [references/pill-controls.md](references/pill-controls.md). Apply `UI-PILL-001`: no pill contains a dot marker in focused or unfocused states. Preserve visible focus and understandable selection/status through accessible non-dot treatments, and include affected states in design/product QA.
+
+When designing, implementing, or reviewing dropdowns, chip dropdowns, buttons, or opened menus near a viewport or container edge, read [references/control-edge-spacing.md](references/control-edge-spacing.md). Apply `UI-EDGE-001` to both trigger and menu: use product-native outer gutters, preserve the focus outline and safe area, and reposition overlays to remain usable. Include affected states and viewports in design/product QA.
+
+When web work changes a page, journey, destination, or navigation entry, read [references/responsive-entry-coverage.md](references/responsive-entry-coverage.md). Apply `UI-RESP-001`: map affected destinations and essential actions to usable desktop and mobile-web entry paths before approval, then exercise those paths in product QA. Adaptive placement is allowed; an entry may not silently disappear at a breakpoint.
+
+When designing, implementing, or reviewing an icon paired with a label, read [references/icon-label-alignment.md](references/icon-label-alignment.md). Apply `UI-ICON-001`: match apparent icon and text weight, align their optical vertical centers, and center the pair in its interactive row. Inspect the rendered states in design and product QA.
+
 ## Run the design pipeline
 
 ### Intake and decision framing

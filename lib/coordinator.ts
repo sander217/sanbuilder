@@ -11,7 +11,9 @@ import {
   type QaPhase,
   type WorkflowArtifactKind,
   type WorkflowStage,
+  type ContractLockSnapshot,
 } from "./harness.ts";
+import type { QaPolicyGates } from "./run-validation.ts";
 import { assertJsonSchema } from "./schema-validation.mjs";
 import type { ImplementationTargetIdentity } from "./implementation.ts";
 import {
@@ -315,11 +317,11 @@ function expectDigestMap(actualValue: unknown, expected: Record<string, string |
 }
 
 /** Validate the exact, versioned QA gate set in every coordinator runtime. */
-export function assertQaPolicyChecks(value: unknown, phase: QaPhase): QaCheck[] {
+export function assertQaPolicyChecks(value: unknown, phase: QaPhase, policy: QaPolicyGates = QA_POLICY_GATES): QaCheck[] {
   if (!Array.isArray(value) || value.length === 0 || value.length > 50) {
     throw new CoordinatorInvariantError(`${phase} QA checks must be a non-empty list of at most 50 checks.`);
   }
-  const expectedGates = QA_POLICY_GATES[phase];
+  const expectedGates = policy[phase];
   const checks = value.map((item, index) => {
     const check = recordValue(item, `${phase} QA checks[${index}]`);
     const id = requireNonEmptyString(check.id, `${phase} QA checks[${index}].id`);
@@ -329,7 +331,7 @@ export function assertQaPolicyChecks(value: unknown, phase: QaPhase): QaCheck[] 
     );
     const label = requireNonEmptyString(check.label, `${phase} QA checks[${index}].label`);
     const summary = requireNonEmptyString(check.summary, `${phase} QA checks[${index}].summary`);
-    if (!(policyGateId in expectedGates)) {
+    if (!Object.hasOwn(expectedGates, policyGateId)) {
       throw new CoordinatorInvariantError(`${policyGateId} is not a ${phase} QA policy gate.`);
     }
     if (check.severity !== expectedGates[policyGateId]) {
@@ -360,10 +362,33 @@ export function assertQaPolicyChecks(value: unknown, phase: QaPhase): QaCheck[] 
 }
 
 /** Runtime-critical validation shared by the portable and hosted coordinators. */
+export function resolveLockedRunTarget(run: CoordinatorRunState, lock: ContractLockSnapshot, requireDelivery = false) {
+  assertJsonSchema("contract-lock.schema.json", lock);
+  if (!lock.validationTarget || !lock.qaPolicy.gates || !lock.product) {
+    throw new CoordinatorInvariantError("This legacy contract lock lacks validation context; start a new run with the pinned binding.");
+  }
+  expectEqual(lock.runId, run.id, "locked runId");
+  expectEqual(lock.productAdapter.id, run.adapterId, "locked adapter");
+  expectEqual(lock.validationTarget.environment, run.environment, "locked environment");
+  expectEqual(lock.productAdapter.revision, `${run.environment}@${lock.product.commit}`, "locked adapter revision");
+  const metadata = requireArtifact(run, "compile-contract-lock").metadata ?? {};
+  const expected = {
+    brandId: lock.brand.id, productId: lock.productProfile.id,
+    productRepository: lock.product.repository, productBaseBranch: lock.product.baseBranch,
+    productCommit: lock.product.commit, qaPolicyRef: lock.qaPolicy.ref, qaPolicyDigest: lock.qaPolicy.digest,
+  };
+  for (const [key, value] of Object.entries(expected)) expectEqual(metadata[key], value, `locked ${key}`);
+  if (requireDelivery && !lock.validationTarget.deliveryEnabled) {
+    throw new CoordinatorInvariantError("Locked target is reference-only and cannot receive product writes.");
+  }
+  return { brand: lock.brand, product: lock.productProfile, adapter: lock.product, qaPolicyGates: lock.qaPolicy.gates };
+}
+
 export function assertStageArtifactContent(
   run: CoordinatorRunState,
   stage: WorkflowStage,
   value: unknown,
+  lockedContext?: ContractLockSnapshot,
 ) {
   const schemaFile = STAGE_SCHEMA_FILES[stage];
   if (schemaFile) {
@@ -387,10 +412,11 @@ export function assertStageArtifactContent(
   const implementationDigest = run.artifacts.implementation?.digest;
   const productQaDigest = run.artifacts["product-qa"]?.digest;
   const productPrDigest = run.artifacts["product-pr"]?.digest;
-  const runTarget = resolveRunTarget({
+  const requiresDelivery = ["implementation", "product-qa", "product-pr", "figma-backup"].includes(stage);
+  const runTarget = lockedContext ? resolveLockedRunTarget(run, lockedContext, requiresDelivery) : resolveRunTarget({
     adapterId: run.adapterId,
     environment: run.environment,
-    requireDelivery: ["implementation", "product-qa", "product-pr", "figma-backup"].includes(stage),
+    requireDelivery: requiresDelivery,
   });
   const productTarget = runTarget.adapter;
 
@@ -493,7 +519,7 @@ export function assertStageArtifactContent(
     if (contractLock.metadata?.qaPolicyRef) {
       expectEqual(qaPolicy.ref, contractLock.metadata.qaPolicyRef, "design QA policy ref");
     }
-    const checks = assertQaPolicyChecks(content.checks, "design");
+    const checks = assertQaPolicyChecks(content.checks, "design", lockedContext?.qaPolicy.gates);
     expectEqual(content.status, deriveQaReportStatus(checks), "design QA normalized status");
   }
   if (stage === "implementation") {
@@ -548,7 +574,7 @@ export function assertStageArtifactContent(
     if (contractLock.metadata?.qaPolicyRef) {
       expectEqual(qaPolicy.ref, contractLock.metadata.qaPolicyRef, "product QA policy ref");
     }
-    const checks = assertQaPolicyChecks(content.checks, "product");
+    const checks = assertQaPolicyChecks(content.checks, "product", lockedContext?.qaPolicy.gates);
     expectEqual(content.status, deriveQaReportStatus(checks), "product QA normalized status");
     const target = recordValue(content.target, "product QA target");
     expectEqual(target.repository, productTarget.repository, "product QA repository");

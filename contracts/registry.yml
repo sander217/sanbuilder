@@ -6,7 +6,7 @@ contracts:
   atlas-brand-design:
     scope: brand
     brand: atlas
-    ref: atlas-brand@1.0.0
+    ref: atlas-brand@1.2.0
     path: contracts/atlas/DESIGN.md
     owner: design-systems
   atlas-web-experience:
@@ -20,7 +20,7 @@ contracts:
     scope: product
     brand: atlas
     product: atlas-web
-    ref: atlas-web-qa@1.0.0
+    ref: atlas-web-qa@1.1.0
     path: contracts/atlas/qa-policy.yml
     owner: product-qa
 

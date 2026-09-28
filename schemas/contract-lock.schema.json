@@ -86,9 +86,42 @@
       },
       "additionalProperties": false
     },
-    "qaPolicy": { "$ref": "#/$defs/versionedRef" }
+    "validationTarget": {
+      "type": "object",
+      "required": ["environment", "deliveryEnabled"],
+      "properties": {
+        "environment": { "type": "string", "minLength": 1 },
+        "deliveryEnabled": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "qaPolicy": {
+      "type": "object",
+      "required": ["ref", "digest"],
+      "properties": {
+        "ref": { "type": "string", "minLength": 1 },
+        "digest": { "$ref": "#/$defs/digest" },
+        "gates": {
+          "type": "object",
+          "required": ["design", "product"],
+          "properties": {
+            "design": { "$ref": "#/$defs/qaGates" },
+            "product": { "$ref": "#/$defs/qaGates" }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    }
   },
   "$defs": {
+    "qaGates": {
+      "type": "object",
+      "minProperties": 1,
+      "maxProperties": 50,
+      "propertyNames": { "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+      "additionalProperties": { "enum": ["blocking", "review"] }
+    },
     "slug": {
       "type": "string",
       "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
